@@ -43,8 +43,8 @@ auth.use(gitHubStrategy);
 ### Setup your routes
 
 ```html
-<form action="/auth/sso" method="get">
-  <button>Login with SSO</button>
+<form action="/auth/github" method="get">
+  <button>Login with Github</button>
 </form>
 ```
 
