@@ -1,58 +1,92 @@
-# create-svelte
+![Logo](https://repository-images.githubusercontent.com/726691357/f09bf6fc-3844-4584-8eee-6bfb425d8a38)
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+# svelte-auth-github strategy
 
-Read more about creating a library [in the docs](https://kit.svelte.dev/docs/packaging).
+The Github strategy is used to authenticate users against a github account. It extends the OAuth2Strategy.
 
-## Creating a project
+For more details: <https://github.com/willin/svelte-auth>
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Supported runtimes
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+| Runtime    | Has Support |
+| ---------- | ----------- |
+| Node.js    | ✅          |
+| Cloudflare | ✅          |
+| Vercel     | ✅          |
 
-# create a new project in my-app
-npm create svelte@latest my-app
+## Usage
+
+### Create an OAuth application
+
+Follow the steps on [the GitHub documentation](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app) to create a new application and get a client ID and secret.
+
+### Create the strategy instance
+
+```ts
+import { GitHubStrategy } from '@svelte-dev/auth-github';
+
+let gitHubStrategy = new GitHubStrategy(
+  {
+    clientID: 'YOUR_CLIENT_ID',
+    clientSecret: 'YOUR_CLIENT_SECRET',
+    callbackURL: 'https://example.com/auth/github/callback'
+  },
+  async ({ accessToken, extraParams, profile }) => {
+    // Get the user data from your DB or API using the tokens and profile
+    return User.findOrCreate({ email: profile.emails[0].value });
+  }
+);
+
+auth.use(gitHubStrategy);
 ```
 
-## Developing
+### Setup your routes
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```html
+<form action="/auth/sso" method="get">
+  <button>Login with SSO</button>
+</form>
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+```tsx
+// routes/auth/github/+server
+import { authenticator } from '~/auth.server';
+import type { RequestHandler } from './$types';
 
-## Building
-
-To build your library:
-
-```bash
-npm run package
+export const POST: RequestHandler = async (event) => {
+  return authenticator.authenticate('github', event);
+};
 ```
 
-To create a production version of your showcase app:
+```tsx
+// routes/auth/github/callback/+server
+import { authenticator } from '~/auth.server';
+import type { PageServerLoad } from './$types';
 
-```bash
-npm run build
+export const load: PageServerLoad = async ({ event }) => {
+  return authenticator.authenticate('github', event, {
+    successRedirect: '/dashboard',
+    failureRedirect: '/login'
+  });
+};
 ```
 
-You can preview the production build with `npm run preview`.
+## 赞助 Sponsor
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+维护者 Owner： [Willin Wang](https://willin.wang)
 
-## Publishing
+如果您对本项目感兴趣，可以通过以下方式支持我：
 
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
+- 关注我的 Github 账号：[@willin](https://github.com/willin) [![github](https://img.shields.io/github/followers/willin.svg?style=social&label=Followers)](https://github.com/willin)
+- 参与 [爱发电](https://afdian.net/@willin) 计划
+- 支付宝或微信[扫码打赏](https://user-images.githubusercontent.com/1890238/89126156-0f3eeb80-d516-11ea-9046-5a3a5d59b86b.png)
 
-To publish your library to [npm](https://www.npmjs.com):
+Donation ways:
 
-```bash
-npm publish
-```
+- Github: <https://github.com/sponsors/willin>
+- Paypal: <https://paypal.me/willinwang>
+- Alipay or Wechat Pay: [QRCode](https://user-images.githubusercontent.com/1890238/89126156-0f3eeb80-d516-11ea-9046-5a3a5d59b86b.png)
+
+## 许可证 License
+
+Apache-2.0
