@@ -36,7 +36,7 @@
     "!dist/**/*.spec.*"
   ],
   "dependencies": {
-    "@svelte-dev/auth-oauth2": "^0.0.5"
+    "@svelte-dev/auth-oauth2": "^0.1.0"
   },
   "peerDependencies": {
     "@svelte-dev/auth": "^0.1.2",
